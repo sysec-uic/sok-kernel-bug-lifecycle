@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoK: OS Kernel Bug Lifecycle</title>
+<meta name="description" content="Companion site for the IEEE S&amp;P 2027 SoK paper “From Finding to Deployment: Systematizing the OS Kernel Bug Lifecycle”: paper, dataset, code, and the classification of surveyed systems.">
+<meta property="og:title" content="SoK: From Finding to Deployment — Systematizing the OS Kernel Bug Lifecycle">
+<meta property="og:description" content="IEEE S&amp;P 2027. A five-stage systematization of Linux kernel bug handling, a measurement of 6,946 syzbot-fixed bugs, and an LLM patch-generation benchmark.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <nav class="wrap nav">
+    <a class="brand" href="#top">KernelBugSoK</a>
+    <div class="navlinks">
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#challenges">Challenges</a>
+      <a href="#measurement">Measurement</a>
+      <a href="#benchmark">Benchmark</a>
+      <a href="#systems">Systems</a>
+      <a href="#artifacts">Artifacts</a>
+      <a href="#cite">Cite</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="top">
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="wrap">
+    <p class="venue">IEEE Symposium on Security and Privacy (S&amp;P) 2027 · SoK</p>
+    <h1>SoK: From Finding to Deployment:<br>Systematizing the OS Kernel Bug Lifecycle</h1>
+    <p class="authors">
+      <span>Luyao Bai<sup>1</sup></span>,
+      <span>Gengda She<sup>2</sup></span>,
+      <span>Kenan Alghythee<sup>1</sup></span>,
+      <span>Hang Zhang<sup>2</sup></span>, and
+      <span>Xiaoguang Wang<sup>1</sup></span>
+    </p>
+    <p class="affils"><sup>1</sup>University of Illinois Chicago &nbsp;·&nbsp; <sup>2</sup>Indiana University Bloomington</p>
+
+    <div class="buttons">
+      <a class="btn primary" href="paper/sok-kernel-bug-lifecycle-sp27.pdf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 3v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Paper (PDF)</a>
+      <a class="btn" href="https://huggingface.co/datasets/xiaoguangwang/syzfix-dataset">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Dataset</a>
+      <a class="btn" href="https://sysec-uic.github.io/SyzFix/">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>SyzFix Code</a>
+      <a class="btn" href="#systems">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Classification</a>
+      <a class="btn" href="https://github.com/sysec-uic/KernelBugSoK">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>GitHub</a>
+      <a class="btn" href="#cite">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>BibTeX</a>
+    </div>
+
+    <ul class="stats" aria-label="Headline numbers">
+      <li><b>140</b><span>research efforts &amp; production systems surveyed</span></li>
+      <li><b>6,946</b><span>syzbot-fixed Linux kernel bugs measured</span></li>
+      <li><b>35 days</b><span>median crash-to-patch latency</span></li>
+      <li><b>26.7%</b><span>of fixed bugs have no reproducer</span></li>
+      <li><b>≤ 6%</b><span>end-to-end LLM repair rate on 80 hard crashes</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ ABSTRACT ============================ -->
+<section class="block" id="abstract">
+  <div class="wrap narrow">
+    <h2>Abstract</h2>
+    <p>Automated kernel bug discovery has advanced rapidly. Continuous fuzzing and static analysis systems, such as syzbot, now expose Linux kernel bugs at a scale that downstream processes struggle to absorb. Yet a crash report is only the beginning. Before a bug is eliminated, it must be triaged, understood, patched, validated, reviewed, integrated, and often backported. These later stages remain far less automated, creating a persistent gap between bug discovery and patch deployment.</p>
+    <p>This SoK systematizes the Linux kernel bug lifecycle from discovery to deployment. We organize prior work and production systems into five stages: discovery, triage, patch generation, patch validation, and integration. We explain the resulting automation gradient through kernel-specific challenges such as concurrency, implicit invariants, cross-syscall state, hardware dependence, lack of fault isolation, and architecture/configuration multiplicity. We further ground the analysis in a measurement of real syzbot-fixed bugs. The data shows that the crash-to-patch gap is not merely a backlog of unfixed reports but a structural failure mode of the repair pipeline: even after being fixed, bugs often remain open for weeks, require review-driven patch revisions, or lack reproducers that current repair and validation systems assume. These findings expose a deeper mismatch: today's repair and validation techniques often assume reliable reproducers, localized root causes, and checkable correctness oracles, yet these are precisely the artifacts missing from many real kernel bug reports. Closing the crash-to-patch gap, therefore, requires treating such artifacts as outputs to be produced, not prerequisites to be assumed.</p>
+  </div>
+</section>
+
+<!-- ============================ LIFECYCLE ============================ -->
+<section class="block alt" id="lifecycle">
+  <div class="wrap">
+    <h2>The Kernel Bug Lifecycle</h2>
+    <p class="lede">Five stages, from a fuzzer crash to a fix in every affected tree. Automation is mature at the front and thins to manual work at the back: the <em>automation gradient</em>.</p>
+
+    <ol class="pipeline">
+      <li class="st s1"><span class="lvl" title="Production-deployed automation">A0</span><div><b>S1 Discovery</b><small>fuzzing, static analysis</small></div></li>
+      <li class="st s2"><span class="lvl" title="Offline / prototype automation">A1</span><div><b>S2 Triage</b><small>dedup, impact, root cause</small></div></li>
+      <li class="st s3"><span class="lvl" title="Prototype or human-in-the-loop">A1/H</span><div><b>S3 Generation</b><small>repair, backport</small></div></li>
+      <li class="st s4"><span class="lvl" title="Human-in-the-loop">H</span><div><b>S4 Validation</b><small>correctness, completeness</small></div></li>
+      <li class="st s5"><span class="lvl" title="Manual">M</span><div><b>S5 Integration</b><small>review, merge, stable</small></div></li>
+    </ol>
+    <p class="legend"><b>A0</b> production-deployed · <b>A1</b> offline/prototype · <b>H</b> human-in-the-loop · <b>M</b> manual. Revisions and re-backports loop S5 back to S3.</p>
+
+    <div class="table-scroll">
+      <table class="data">
+        <caption>A cross-cutting taxonomy applied uniformly to all five stages (Table 1 in the paper).</caption>
+        <thead><tr><th>Stage</th><th>Consumes → Produces</th><th>Dominant method</th><th>Auto.</th><th>Oracle (“done”)</th><th>Productive LLM role</th><th>Chal.</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag s1">S1</span> Discovery</td><td>source/binary → crash + report</td><td>coverage-guided search, static analysis</td><td>A0</td><td><em>strong</em>: crash / sanitizer trips</td><td>generator: specs, checkers</td><td>C1, C3, C4</td></tr>
+          <tr><td><span class="tag s2">S2</span> Triage</td><td>crash + report → root cause, severity, dedup</td><td>symbolic exec., static, learning</td><td>A1</td><td><em>partial</em>: exploit primitive, dup match</td><td>judge: severity labels</td><td>C3, C5</td></tr>
+          <tr><td><span class="tag s3">S3</span> Generation</td><td>root cause → candidate patch</td><td>templates, transforms, LLM agents</td><td>A1/H</td><td><em>weak</em>: a single reproducer</td><td>agent: propose patch</td><td>C2, C6</td></tr>
+          <tr><td><span class="tag s4">S4</span> Validation</td><td>patch → correct/complete verdict</td><td>directed fuzzing, static, PoC</td><td>H</td><td><em>weak/none</em>: no spec for completeness</td><td>judge: correctness (unverified)</td><td>C2, C5</td></tr>
+          <tr><td><span class="tag s5">S5</span> Integration</td><td>patch → merged + backported fix</td><td>human review, social process</td><td>M</td><td><em>social</em>: maintainer acceptance</td><td>generator: review comments</td><td>C6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CHALLENGES ============================ -->
+<section class="block" id="challenges">
+  <div class="wrap">
+    <h2>Why Kernel Bugs Are Different</h2>
+    <p class="lede">Six cross-cutting properties of the OS kernel shape every stage. They weigh far more heavily on the later stages than on discovery, which helps explain the automation gradient.</p>
+    <div class="cards">
+      <article class="card"><span class="cid">C1</span><h3>Pervasive concurrency</h3><p>Data races, deadlocks, and concurrent-free UAFs belong to an interleaving, not an input. Most user-space APR and fuzzing assume sequential behavior.</p></article>
+      <article class="card"><span class="cid">C2</span><h3>Implicit invariants</h3><p>Lock ordering, refcount balance, RCU grace periods, no sleeping in atomic context: no test suite encodes them, so generate-and-validate has no specification.</p></article>
+      <article class="card"><span class="cid">C3</span><h3>Cross-syscall state</h3><p>Kernel objects persist across system calls. Triggering a bug needs a precise sequence, and the symptom can sit far from the faulty instruction.</p></article>
+      <article class="card"><span class="cid">C4</span><h3>Hardware dependence</h3><p>Drivers are most of the kernel and depend on devices, MMIO, DMA, interrupts, and firmware that many test environments lack.</p></article>
+      <article class="card"><span class="cid">C5</span><h3>No fault isolation</h3><p>No process boundary contains a fault. A benign-looking <code>WARNING</code> can hide an arbitrary write, and a faulty patch can leave the system unbootable.</p></article>
+      <article class="card"><span class="cid">C6</span><h3>Config &amp; tree multiplicity</h3><p>One source builds for many architectures and thousands of configs, and ships through mainline plus stable and vendor trees. Fixes must hold, and be backported, across all of them.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ MEASUREMENT ============================ -->
+<section class="block alt" id="measurement">
+  <div class="wrap">
+    <h2>Measuring the Crash-to-Patch Gap</h2>
+    <p class="lede">6,946 Linux kernel bugs that syzbot reports as fixed, each linked through its full lifecycle: crash timestamps, reproducers, the reconstructed patch series (v1 → v2 → …), reviewer threads from <code>lore.kernel.org</code>, and the merged commit.</p>
+
+    <div class="figs">
+      <figure class="fig">
+        <img src="assets/img/latency.png" alt="Left: CDF of crash-to-patch latency on log time, median 35 days, 13% exceed one year. Right: median latency by bug class, from data-race at 15 days to hang at 111 days." loading="lazy">
+        <figcaption><b>Crash-to-patch latency.</b> Left: CDF on log time; the median is 35 days and 13% exceed one year. Right: median latency by bug class. Semantically diffuse bugs (hangs, UAF) linger; sharp-signature bugs (races, null-deref) close fast.</figcaption>
+      </figure>
+      <figure class="fig">
+        <img src="assets/img/latency_decomp.png" alt="Stacked bar of mean per-bug share of latency: 51% before first patch, 4% revision churn, 11% review and merge wait, 35% post-merge confirmation lag." loading="lazy">
+        <figcaption><b>Where the time goes</b> (mean per-bug share, n = 3,371). Just over half precedes the first posted patch. Revision churn is a thin 4% with a long tail, and a third is syzbot's post-merge confirmation lag.</figcaption>
+      </figure>
+    </div>
+
+    <h3 class="sub">Key findings</h3>
+    <ol class="findings">
+      <li>Even among bugs that are eventually fixed, the gap is large and heavy-tailed: median 35 days, mean 138, 13% over a year. This is a conservative lower bound.</li>
+      <li>Since continuous fuzzing matured in 2019, the median has held at about three weeks for six years. The gap is a structural property of the back end, not a transient.</li>
+      <li>About 51% of measured latency occurs before the first patch, 4% in revision churn, 11% in review and acceptance, and 35% in syzbot's post-merge confirmation.</li>
+      <li>Latency varies more than 10× across subsystems (median 6–212 days), and reproducer scarcity ranges from 7% to 32%. No single intervention closes the gap everywhere.</li>
+      <li>21% of fixes take two or more review-driven revisions, and a long tail draws 40+ reviewer messages.</li>
+      <li>26.7% of fixed bugs lack any reproducer and a third lack a C reproducer, yet the typical fix is small (median 1 file, 5 lines). Only 34% are “repair-ready”.</li>
+      <li>No bug class has dedicated automation across all four technical stages. Coverage is dense at discovery and triage and collapses at generation and validation.</li>
+    </ol>
+
+    <h3 class="sub">Coverage-gap matrix</h3>
+    <p>Strongest automation per (bug class × technical stage). The empty lower-right is the crash-to-patch gap, drawn at the technique level.</p>
+    <div class="table-scroll">
+      <table class="data matrix">
+        <thead><tr><th>Bug class</th><th class="num"># fixed</th><th>Discovery</th><th>Triage</th><th>Generation</th><th>Validation</th></tr></thead>
+        <tbody id="coverageBody"></tbody>
+      </table>
+    </div>
+    <p class="legend"><span class="mk full">●</span> dedicated kernel technique &nbsp; <span class="mk part">◐</span> generic only &nbsp; <span class="mk none">○</span> none</p>
+  </div>
+</section>
+
+<!-- ============================ BENCHMARK ============================ -->
+<section class="block" id="benchmark">
+  <div class="wrap">
+    <h2>LLM Patch-Generation Benchmark</h2>
+    <p class="lede">Thirteen LLM patch-generation configurations on 80 evolution-stage syzbot crashes (bugs whose first upstream fix was itself revised). Each candidate is scored for localization and, by two semantic judge models with author re-judging of disagreements, for repair.</p>
+    <div class="callout">Localization is far easier than repair. Methods touch a correct file 55–66% of the time, and 95–100% with an oracle. End-to-end repair never exceeds 5/80. Told the exact function to edit, models still fix only 2/80.</div>
+    <div class="table-scroll">
+      <table class="data bench">
+        <thead>
+          <tr><th rowspan="2">Method</th><th colspan="3">Localization %</th><th colspan="2">Localization set</th><th colspan="2">Repair (of 80)</th></tr>
+          <tr><th>any</th><th>file</th><th>func</th><th>struct</th><th>macro</th><th>Fixed</th><th>Partial</th></tr>
+        </thead>
+        <tbody id="benchBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SYSTEMS ============================ -->
+<section class="block alt" id="systems">
+  <div class="wrap">
+    <h2>Surveyed Systems</h2>
+    <p class="lede">The classification from the paper's appendix (Tables 6 and 7): every discovery system with its type, target, bug class, and technique families, and representative systems for triage, generation, validation, and integration with their automation level.</p>
+
+    <div class="controls">
+      <input type="search" id="q" placeholder="Search systems, titles, venues, authors…" aria-label="Search systems">
+      <div class="chips" id="stageChips" role="group" aria-label="Filter by stage"></div>
+      <label class="check"><input type="checkbox" id="llmOnly"> LLM-based only</label>
+      <span class="count" id="count"></span>
+      <span class="dl">Download: <a href="data/systems.csv" download>CSV</a> · <a href="data/systems.json" download>JSON</a></span>
+    </div>
+
+    <div class="table-scroll tall">
+      <table class="data systems">
+        <thead>
+          <tr>
+            <th data-sort="system">System</th>
+            <th data-sort="stage">Stage</th>
+            <th data-sort="detail">Classification</th>
+            <th data-sort="venue">Venue</th>
+            <th data-sort="year" class="num">Year</th>
+          </tr>
+        </thead>
+        <tbody id="sysBody"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <details class="glossary">
+      <summary>Technique-family abbreviations</summary>
+      <dl id="techGloss"></dl>
+      <p>Discovery type: F = fuzzing, S = static, H = hybrid, E = empirical study. ★ = LLM-based. (U) = user-space contrast.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============================ ARTIFACTS ============================ -->
+<section class="block" id="artifacts">
+  <div class="wrap">
+    <h2>Artifacts</h2>
+    <p class="lede">Everything behind the paper's figures and statistics is public.</p>
+    <div class="cards art">
+      <a class="card link" href="https://huggingface.co/datasets/xiaoguangwang/syzfix-dataset">
+        <h3>SyzFix dataset <span aria-hidden="true">→</span></h3>
+        <p>The syzbot-fixed bugs with crash reports, reproducers, patch revisions, reviewer threads, and merged commits. Hosted on Hugging Face.</p>
+      </a>
+      <a class="card link" href="https://sysec-uic.github.io/SyzFix/">
+        <h3>SyzFix code <span aria-hidden="true">→</span></h3>
+        <p>The scraper that builds the dataset from syzbot, lore.kernel.org, and kernel git, plus the analyzers behind the measurement section.</p>
+      </a>
+      <a class="card link" href="#systems">
+        <h3>Classification <span aria-hidden="true">→</span></h3>
+        <p>Stage, type, target, bug class, technique family, and automation level of the surveyed systems, as CSV and JSON.</p>
+      </a>
+      <a class="card link" href="https://github.com/sysec-uic/KernelBugSoK">
+        <h3>Benchmark verdicts <span aria-hidden="true">→</span></h3>
+        <p>The judge rubric, per-candidate verdicts, and rationales for the 80-crash patch-generation benchmark.</p>
+      </a>
+    </div>
+    <p class="note">Ethics: all data comes from public sources on bugs syzbot had already marked fixed. No unfixed vulnerability, proof of concept, or exploit is included, and no LLM-generated patch was sent to kernel maintainers.</p>
+  </div>
+</section>
+
+<!-- ============================ CITE ============================ -->
+<section class="block alt" id="cite">
+  <div class="wrap narrow">
+    <h2>Citation</h2>
+    <div class="bib">
+      <button class="copy" id="copyBib" type="button">Copy</button>
+<pre id="bibtex">@inproceedings{bai2027sok,
+  title     = {{SoK}: From Finding to Deployment: Systematizing the {OS} Kernel Bug Lifecycle},
+  author    = {Bai, Luyao and She, Gengda and Alghythee, Kenan and Zhang, Hang and Wang, Xiaoguang},
+  booktitle = {Proceedings of the IEEE Symposium on Security and Privacy (S\&amp;P)},
+  year      = {2027}
+}</pre>
+    </div>
+    <p class="note">This work is supported in part by US NSF grants 2127491 and 2154199, and a Google Cloud gift award.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>© 2026 The authors · <a href="https://github.com/sysec-uic">SySeC Lab @ UIC</a> · Questions: open an issue on <a href="https://github.com/sysec-uic/KernelBugSoK/issues">GitHub</a></p>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
