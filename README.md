@@ -25,12 +25,6 @@ Code: [SyzFix](https://sysec-uic.github.io/SyzFix/)
 python3 -m http.server 8000
 ```
 
-## Regenerating the classification data
-
-```bash
-python3 tools/extract_systems.py ../sok-oakland27
-```
-
 ## Citation
 
 ```bibtex
