@@ -1,4 +1,4 @@
-// KernelBugSoK companion site: theme toggle, data tables, systems explorer.
+// sok-kernel-bug-lifecycle companion site: theme toggle, data tables, systems explorer.
 (function () {
   "use strict";
 

@@ -2,7 +2,7 @@
 
 Companion website for our IEEE S&P 2027 SoK paper.
 
-**Website:** https://sysec-uic.github.io/KernelBugSoK/
+**Website:** https://sysec-uic.github.io/sok-kernel-bug-lifecycle/
 
 Luyao Bai, Gengda She, Kenan Alghythee, Hang Zhang, and Xiaoguang Wang
 (University of Illinois Chicago, Indiana University Bloomington)
